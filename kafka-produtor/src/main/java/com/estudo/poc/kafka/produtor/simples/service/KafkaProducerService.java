@@ -1,4 +1,4 @@
-package com.estudo.poc.kafkaprodutor.simples.service;
+package com.estudo.poc.kafka.produtor.simples.service;
 
 import org.springframework.beans.factory.annotation.Value; // Para injetar valores de propriedades
 import org.springframework.kafka.core.KafkaTemplate; // Classe principal para enviar mensagens Kafka
