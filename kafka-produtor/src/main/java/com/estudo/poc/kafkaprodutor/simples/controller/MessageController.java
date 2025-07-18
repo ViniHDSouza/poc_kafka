@@ -1,6 +1,6 @@
-package com.estudo.poc.kafka_produtor.controller;
+package com.estudo.poc.kafkaprodutor.simples.controller;
 
-import com.estudo.poc.kafka_produtor.service.KafkaProducerService;
+import com.estudo.poc.kafkaprodutor.simples.service.KafkaProducerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
