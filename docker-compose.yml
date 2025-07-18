@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0 # Imagem do Zookeeper. Serviço de coordenação distribuída que o Kafka utiliza para gerenciar o estado do cluster
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181" # Porta padrao do Zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker:
+    image: confluentinc/cp-kafka:7.5.0 # Imagem do Kafka Broker
+    hostname: broker
+    container_name: broker
+    depends_on:
+      - zookeeper # Garante que o Zookeeper inicie antes do Kafka
+    ports:
+      - "9092:9092" # Porta para comunicaçao externa
+      - "9093:9093" # Porta para comunicaçao interna (entre brokers)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181' # Conecta ao Zookeeper
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT # Protocolos de segurança
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9093,PLAINTEXT_HOST://localhost:9092 # Endereços para produtores/consumidores. 
+      #PLAINTEXT://broker:9093 é o endereço interno para comunicação entre os contêineres Docker.
+      #PLAINTEXT_HOST://localhost:9092 é o endereço que os clientes externos (sua aplicação Spring Boot rodando na sua máquina) usarão para se conectar.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest # Interface grafica para gerenciar Kafka
+    hostname: kafka-ui
+    container_name: kafka-ui
+    depends_on:
+      - broker
+    ports:
+      - "8080:8080" # Porta da interface web
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-kafka-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: broker:9093 # Conecta ao broker interno.  A UI se conecta ao broker usando o nome do serviço Docker ( broker ) e a porta interna ( 9093 ).
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_JMX_PORT: 9991 # Porta JMX para monitoramento (opcional)
